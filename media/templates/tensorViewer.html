@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; style-src {{cspSource}} 'unsafe-inline'; script-src 'nonce-{{nonce}}' https://cdn.plot.ly; img-src {{cspSource}} data:; connect-src 'self';">
+    <link href="{{styleUri}}" rel="stylesheet">
+    <title>张量预览</title>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 依赖状态提示 -->
+        <div class="dependency-banner" id="dependencyBanner" style="display: none;">
+            <span class="banner-icon">
+                <svg viewBox="0 0 24 24" class="icon icon-warning">
+                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+                </svg>
+            </span>
+            <span class="banner-text" id="bannerText"></span>
+            <button class="btn btn-sm btn-primary" id="installDepBtn">安装依赖</button>
+            <button class="btn btn-sm" id="closeBannerBtn">×</button>
+        </div>
+
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <span class="file-name" id="fileName">{{fileName}}</span>
+                <button class="btn btn-icon" id="refreshBtn" title="刷新">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                    </svg>
+                </button>
+                <button class="btn btn-icon" id="checkDepBtn" title="检查依赖">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="toolbar-center">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索...">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="regexCheck"> 正则
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="caseCheck"> 区分大小写
+                    </label>
+                    <button class="btn btn-primary" id="searchBtn">搜索</button>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <select id="chartType" class="select">
+                    <option value="line">折线图</option>
+                    <option value="bar">柱状图</option>
+                    <option value="scatter">散点图</option>
+                    <option value="heatmap">热力图</option>
+                    <option value="histogram">直方图</option>
+                    <option value="image">图像</option>
+                </select>
+                <button class="btn btn-secondary" id="plotBtn">绑图</button>
+                <button class="btn btn-secondary" id="exportBtn">导出</button>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧：张量列表 -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h3>张量列表</h3>
+                    <div class="filter-box">
+                        <input type="text" id="filterInput" placeholder="筛选键名...">
+                    </div>
+                </div>
+                <div class="tensor-list" id="tensorList">
+                    <!-- 动态填充 -->
+                </div>
+            </div>
+
+            <!-- 中间：预览区域 -->
+            <div class="preview-area">
+                <div class="preview-tabs">
+                    <button class="tab active" data-tab="data">数据</button>
+                    <button class="tab" data-tab="chart">图表</button>
+                    <button class="tab" data-tab="info">信息</button>
+                </div>
+
+                <div class="tab-content active" id="dataTab">
+                    <div class="data-controls">
+                        <label>切片: <input type="text" id="sliceInput" placeholder="单层: 0,1  多层: 0,1,:5  完整: [0][1][:5]"
+                                class="slice-input"></label>
+                        <button class="btn btn-sm" id="applySlice">应用</button>
+                    </div>
+                    
+                    <div class="data-table-container">
+                        <table class="data-table" id="dataTable">
+                            <!-- 动态填充 -->
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="chartTab">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="margin: 0;">图表视图</h3>
+                        <button class="btn btn-sm" id="exportChartBtn" title="导出图表为PNG图像">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M8.5 1a.5.5 0 0 0-1 0v8.793l-2.146-2.147a.5.5 0 0 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 9.793V1z"/>
+                                <path d="M3 14.5A1.5 1.5 0 0 1 1.5 13V8.5a.5.5 0 0 0-1 0V13A2.5 2.5 0 0 0 3 15.5h10a2.5 2.5 0 0 0 2.5-2.5V8.5a.5.5 0 0 0-1 0V13a1.5 1.5 0 0 1-1.5 1.5H3z"/>
+                            </svg>
+                            导出图表
+                        </button>
+                    </div>
+                    <div id="plotContainer"></div>
+                </div>
+
+                <div class="tab-content" id="infoTab">
+                    <div class="info-panel" id="infoPanel">
+                        <!-- 动态填充 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <span id="statusText">就绪</span>
+            <span id="tensorStats"></span>
+            <span id="depStatus" class="dep-status"></span>
+        </div>
+    </div>
+
+    <!-- 加载遮罩 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <span>加载中...</span>
+    </div>
+
+    <!-- 不可用提示 -->
+    <div class="unavailable-overlay" id="unavailableOverlay" style="display: none;">
+        <div class="unavailable-content">
+            <svg class="unavailable-icon" viewBox="0 0 24 24">
+                <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+            </svg>
+            <h3 id="unavailableTitle">功能不可用</h3>
+            <p id="unavailableReason"></p>
+            <div class="unavailable-actions">
+                <button class="btn btn-primary" id="installBtn">安装依赖</button>
+                <button class="btn btn-secondary" id="configBtn">配置Python路径</button>
+            </div>
+        </div>
+    </div>
+
+    <script nonce="{{nonce}}" src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script nonce="{{nonce}}" src="{{iconsUri}}"></script>
+    <script nonce="{{nonce}}" src="{{scriptUri}}"></script>
+    <script nonce="{{nonce}}">
+        // 初始化依赖状态
+        window.dependencyStatus = {{ dependencyStatus }};
+        window.featureAvailability = {{ featureAvailability }};
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 16px; color: var(--vscode-foreground); background: var(--vscode-sideBar-background); }
+        .loading { text-align: center; padding: 40px 20px; }
+        .spinner { border: 3px solid var(--vscode-panel-border); border-top-color: var(--vscode-progressBar-background); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .section { margin-bottom: 20px; }
+        .section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; opacity: 0.7; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .section-title-icon { width: 16px; height: 16px; }
+        .card { background: var(--vscode-editor-background); border: 1px solid var(--vscode-panel-border); border-radius: 6px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+        .card:hover { border-color: var(--vscode-focusBorder); background: var(--vscode-list-hoverBackground); }
+        .file-item, .dependency-item { display: flex; align-items: center; gap: 12px; }
+        .file-icon, .dep-status { flex-shrink: 0; width: 24px; height: 24px; }
+        .file-info, .dep-info { flex: 1; min-width: 0; }
+        .file-name, .dep-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-meta, .dep-version { font-size: 11px; color: var(--vscode-descriptionForeground); margin-top: 4px; }
+        .dep-action { flex-shrink: 0; }
+        .btn { padding: 4px 12px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
+        .btn:hover { background: var(--vscode-button-hoverBackground); }
+        .btn-secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
+        .empty-state { text-align: center; padding: 32px 16px; color: var(--vscode-descriptionForeground); }
+        .empty-icon { width: 48px; height: 48px; margin: 0 auto 12px; opacity: 0.3; }
+        .refresh-btn { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; background: var(--vscode-button-background); color: var(--vscode-button-foreground); border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .refresh-btn:hover { transform: rotate(180deg); background: var(--vscode-button-hoverBackground); }
+    </style>
+</head>
+<body>
+    <div id="app"><div class="loading"><div class="spinner"></div><div>加载中...</div></div></div>
+    <button class="refresh-btn" onclick="refresh()" title="刷新"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M13.6 2.3C12.2.9 10.2 0 8 0 3.6 0 0 3.6 0 8s3.6 8 8 8c3.7 0 6.8-2.6 7.7-6h-1.5c-.8 2.6-3.2 4.5-6.2 4.5-3.6 0-6.5-2.9-6.5-6.5S4.4 1.5 8 1.5c1.8 0 3.4.7 4.6 1.9L9.5 6.5h6v-6l-1.9 1.8z"/></svg></button>
+    <script>
+        const vscode = acquireVsCodeApi();
+        
+        // 监听消息
+        window.addEventListener('message', e => { 
+            console.log('收到消息:', e.data);
+            if (e.data.type === 'update') renderUI(e.data.data); 
+        });
+        
+        // 完整SVG图标
+        const icons = {
+            tensor: '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h4v4H4V4zm0 6h4v4H4v-4zm0 6h4v4H4v-4zm6-12h4v4h-4V4zm0 6h4v4h-4v-4zm0 6h4v4h-4v-4zm6-12h4v4h-4V4zm0 6h4v4h-4v-4zm0 6h4v4h-4v-4z"/><circle cx="6" cy="6" r="1.5" fill="var(--vscode-charts-blue)"/><circle cx="12" cy="12" r="1.5" fill="var(--vscode-charts-green)"/><circle cx="18" cy="18" r="1.5" fill="var(--vscode-charts-red)"/></svg>',
+            pytorch: '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 6v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V6l-8-4zm0 2.2l6 3v5.3c0 4.6-3.1 9-6 10.3-2.9-1.3-6-5.7-6-10.3V7.2l6-3z"/><path d="M12 6c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 10c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z" fill="var(--vscode-charts-orange)"/></svg>',
+            numpy: '<svg width="24" height="24" viewBox="0 0 24 24" fill="var(--vscode-charts-blue)"><rect x="4" y="4" width="4" height="4"/><rect x="10" y="4" width="4" height="4"/><rect x="16" y="4" width="4" height="4"/><rect x="4" y="10" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><rect x="16" y="10" width="4" height="4"/><rect x="4" y="16" width="4" height="4"/><rect x="10" y="16" width="4" height="4"/><rect x="16" y="16" width="4" height="4"/></svg>',
+            zip: '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" fill="var(--vscode-charts-purple)"/><rect x="10" y="9" width="2" height="2" fill="var(--vscode-charts-purple)"/><rect x="10" y="12" width="2" height="2" fill="var(--vscode-charts-purple)"/><rect x="10" y="15" width="2" height="2" fill="var(--vscode-charts-purple)"/></svg>',
+            rar: '<svg width="24" height="24" viewBox="0 0 24 24" fill="var(--vscode-charts-orange)"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/><path d="M10 14v-2h2v2h2v2h-2v2h-2v-2H8v-2h2z" fill="white"/></svg>',
+            sevenZ: '<svg width="24" height="24" viewBox="0 0 24 24" fill="var(--vscode-charts-green)"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="8" font-weight="bold">7z</text></svg>',
+            tar: '<svg width="24" height="24" viewBox="0 0 24 24" fill="var(--vscode-charts-yellow)"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/><circle cx="12" cy="12" r="4" fill="white"/></svg>',
+            checkmark: '<svg width="16" height="16" viewBox="0 0 16 16" fill="var(--vscode-charts-green)"><path d="M13.5 2L6 9.5 2.5 6 1 7.5l5 5 9-9z"/></svg>',
+            error: '<svg width="16" height="16" viewBox="0 0 16 16" fill="var(--vscode-charts-red)"><path d="M8 1L1 14h14L8 1zm1 11H7v-2h2v2zm0-3H7V5h2v4z"/></svg>',
+            info: '<svg width="16" height="16" viewBox="0 0 16 16" fill="var(--vscode-charts-blue)"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 7v4M8 4v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+            folder: '<svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" opacity="0.3"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>',
+            package: '<svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" opacity="0.3"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>',
+            sectionTensor: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="2" height="2"/><rect x="7" y="2" width="2" height="2"/><rect x="12" y="2" width="2" height="2"/><rect x="2" y="7" width="2" height="2"/><rect x="7" y="7" width="2" height="2"/><rect x="12" y="7" width="2" height="2"/><rect x="2" y="12" width="2" height="2"/><rect x="7" y="12" width="2" height="2"/><rect x="12" y="12" width="2" height="2"/></svg>',
+            sectionArchive: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M9 1H4c-.6 0-1 .4-1 1v12c0 .6.4 1 1 1h8c.6 0 1-.4 1-1V5l-4-4z"/><rect x="6" y="6" width="1" height="1"/><rect x="6" y="8" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/></svg>',
+            sectionSettings: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M14.5 8.4l-1-.3c-.1-.3-.2-.6-.4-.9l.5-.9c.1-.2.1-.5-.1-.7l-.8-.8c-.2-.2-.5-.2-.7-.1l-.9.5c-.3-.2-.6-.3-.9-.4l-.3-1c-.1-.3-.3-.4-.6-.4h-1.2c-.3 0-.5.1-.6.4l-.3 1c-.3.1-.6.2-.9.4l-.9-.5c-.2-.1-.5-.1-.7.1l-.8.8c-.2.2-.2.5-.1.7l.5.9c-.2.3-.3.6-.4.9l-1 .3c-.3.1-.4.3-.4.6v1.2c0 .3.1.5.4.6l1 .3c.1.3.2.6.4.9l-.5.9c-.1.2-.1.5.1.7l.8.8c.2.2.5.2.7.1l.9-.5c.3.2.6.3.9.4l.3 1c.1.3.3.4.6.4h1.2c.3 0 .5-.1.6-.4l.3-1c.3-.1.6-.2.9-.4l.9.5c.2.1.5.1.7-.1l.8-.8c.2-.2.2-.5.1-.7l-.5-.9c.2-.3.3-.6.4-.9l1-.3c.3-.1.4-.3.4-.6V9c0-.3-.1-.5-.4-.6zM8 11c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3z"/></svg>'
+        };
+        
+        function getFileIcon(path) {
+            const ext = path.split('.').pop().toLowerCase();
+            if (ext === 'pt' || ext === 'pth') return icons.pytorch;
+            return icons.numpy;
+        }
+        
+        function getArchiveIcon(path) {
+            const ext = path.split('.').pop().toLowerCase();
+            if (ext === 'rar') return icons.rar;
+            if (ext === '7z') return icons.sevenZ;
+            if (ext === 'tar' || ext === 'gz') return icons.tar;
+            return icons.zip;
+        }
+        
+        function renderUI(data) {
+            console.log('渲染UI，数据:', data);
+            let html = '<div class="section"><div class="section-title"><span class="section-title-icon">' + icons.sectionTensor + '</span>张量文件</div>';
+            if (data.tensorFiles && data.tensorFiles.length > 0) {
+                data.tensorFiles.forEach(f => {
+                    const icon = f.icon || getFileIcon(f.path);
+                    html += '<div class="card" onclick="openFile(\'' + f.path.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')"><div class="file-item"><div class="file-icon">' + icon + '</div><div class="file-info"><div class="file-name">' + f.name + '</div><div class="file-meta">' + f.size + ' • ' + f.type + '</div></div></div></div>';
+                });
+            } else {
+                html += '<div class="empty-state"><div class="empty-icon">' + icons.folder + '</div><div class="empty-text">工作区中没有张量文件</div></div>';
+            }
+            html += '</div><div class="section"><div class="section-title"><span class="section-title-icon">' + icons.sectionArchive + '</span>压缩文件</div>';
+            if (data.archiveFiles && data.archiveFiles.length > 0) {
+                data.archiveFiles.forEach(f => {
+                    const icon = f.icon || getArchiveIcon(f.path);
+                    html += '<div class="card" onclick="previewArchive(\'' + f.path.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')"><div class="file-item"><div class="file-icon">' + icon + '</div><div class="file-info"><div class="file-name">' + f.name + '</div><div class="file-meta">' + f.size + '</div></div></div></div>';
+                });
+            } else {
+                html += '<div class="empty-state"><div class="empty-icon">' + icons.package + '</div><div class="empty-text">工作区中没有压缩文件</div></div>';
+            }
+            html += '</div><div class="section"><div class="section-title"><span class="section-title-icon">' + icons.sectionSettings + '</span>依赖状态</div>';
+            if (data.dependencies) {
+                const statusIcons = { installed: icons.checkmark, missing: icons.error, optional: icons.info };
+                ['python', 'numpy', 'torch', 'sevenZip'].forEach(k => {
+                    const d = data.dependencies[k];
+                    if (d) html += '<div class="card"><div class="dependency-item"><div class="dep-status">' + statusIcons[d.status] + '</div><div class="dep-info"><div class="dep-name">' + d.name + '</div><div class="dep-version">' + (d.version || d.statusText) + '</div></div>' + (d.action ? '<div class="dep-action"><button class="btn btn-secondary" onclick="installDep(\'' + d.action + '\')">' + d.actionText + '</button></div>' : '') + '</div></div>';
+                });
+            }
+            html += '</div>';
+            document.getElementById('app').innerHTML = html;
+        }
+        
+        function openFile(p) { vscode.postMessage({ command: 'openFile', path: p }); }
+        function previewArchive(p) { vscode.postMessage({ command: 'previewArchive', path: p }); }
+        function installDep(a) { vscode.postMessage({ command: a === 'selectPython' ? 'selectPython' : 'installDep', dep: a }); }
+        function refresh() { vscode.postMessage({ command: 'refresh' }); }
+        
+        // 初始化请求
+        console.log('发送初始化请求');
+        vscode.postMessage({ command: 'init' });
+    </script>
+</body>
+</html>

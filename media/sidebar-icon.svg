@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+  <!-- 放大镜镜面 -->
+  <circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  
+  <!-- 张量网格 -->
+  <g transform="translate(10, 10)" opacity="0.9">
+    <!-- 横线 -->
+    <line x1="-3" y1="-2" x2="3" y2="-2" stroke="currentColor" stroke-width="0.5"/>
+    <line x1="-3" y1="0" x2="3" y2="0" stroke="currentColor" stroke-width="0.5"/>
+    <line x1="-3" y1="2" x2="3" y2="2" stroke="currentColor" stroke-width="0.5"/>
+    <!-- 竖线 -->
+    <line x1="-2" y1="-3" x2="-2" y2="3" stroke="currentColor" stroke-width="0.5"/>
+    <line x1="0" y1="-3" x2="0" y2="3" stroke="currentColor" stroke-width="0.5"/>
+    <line x1="2" y1="-3" x2="2" y2="3" stroke="currentColor" stroke-width="0.5"/>
+    <!-- 中心点 -->
+    <circle cx="0" cy="0" r="0.6" fill="currentColor"/>
+  </g>
+  
+  <!-- 放大镜手柄 -->
+  <line x1="15" y1="15" x2="20" y2="20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

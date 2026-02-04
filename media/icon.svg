@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- 定义渐变 -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A9EFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563EB;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#818CF8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366F1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 背景圆角矩形 -->
+  <rect x="8" y="8" width="112" height="112" rx="24" fill="url(#grad1)"/>
+  
+  <!-- 放大镜镜面 -->
+  <circle cx="54" cy="54" r="28" fill="none" stroke="white" stroke-width="6"/>
+  
+  <!-- 张量网格 - 内部3x3矩阵 -->
+  <g transform="translate(54, 54)" opacity="0.9">
+    <!-- 横线 -->
+    <line x1="-15" y1="-10" x2="15" y2="-10" stroke="white" stroke-width="2.5"/>
+    <line x1="-15" y1="0" x2="15" y2="0" stroke="white" stroke-width="2.5"/>
+    <line x1="-15" y1="10" x2="15" y2="10" stroke="white" stroke-width="2.5"/>
+    <!-- 竖线 -->
+    <line x1="-10" y1="-15" x2="-10" y2="15" stroke="white" stroke-width="2.5"/>
+    <line x1="0" y1="-15" x2="0" y2="15" stroke="white" stroke-width="2.5"/>
+    <line x1="10" y1="-15" x2="10" y2="15" stroke="white" stroke-width="2.5"/>
+    <!-- 中心点 -->
+    <circle cx="0" cy="0" r="3" fill="white"/>
+  </g>
+  
+  <!-- 放大镜手柄 -->
+  <line x1="74" y1="74" x2="94" y2="94" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <line x1="74" y1="74" x2="94" y2="94" stroke="url(#grad2)" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- 点缀元素 - 小数据点 -->
+  <circle cx="98" cy="30" r="4" fill="white" opacity="0.8"/>
+  <circle cx="30" cy="98" r="4" fill="white" opacity="0.8"/>
+  <circle cx="105" cy="50" r="3" fill="white" opacity="0.6"/>
+</svg>
