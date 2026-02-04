@@ -1,0 +1,35 @@
+/**
+ * 中文 - 依赖管理
+ */
+export default {
+    checkingTitle: '检查依赖状态',
+    pythonNotFound: '未检测到Python环境。TensorLens需要Python 3.7+来预览张量文件。',
+    installPython: '安装Python',
+    configurePythonPath: '配置Python路径',
+    systemPythonDetected: '检测到系统Python {0}。建议为TensorLens创建专用虚拟环境以避免依赖冲突。',
+    createVirtualEnv: '创建虚拟环境',
+    useSystemPython: '使用系统Python',
+    venvCreatedSuccess: '虚拟环境创建成功！',
+    venvCreatedFail: '虚拟环境创建失败，请检查终端输出',
+    creatingVenv: '正在创建Python虚拟环境，请等待完成后点击"完成"',
+    missingDependencies: '缺少必要依赖: {0}。张量预览功能将不可用。',
+    installDependencies: '安装依赖',
+    installing: '正在安装 {0}，安装完成后请点击"重新检测"',
+    checkComplete: '依赖检测完成: Python {0}{1}, NumPy {2}, {3}',
+    checkCompleteWithSevenZip: '依赖检测完成: Python {0}{1}, NumPy {2}, {3}。\n{4}',
+    torchInstalled: 'PyTorch {0}',
+    torchNotInstalled: 'PyTorch 未安装（.pt/.pth文件不可用）',
+    sevenZipInstalled: '7-Zip 已安装',
+    sevenZipNotInstalled: '7-Zip 未安装（RAR/7Z解压不可用）',
+    virtualEnv: '(虚拟环境)',
+    warningMissingDeps: 'TensorLens: 缺少依赖 {0}，部分功能不可用',
+    pytorchNotInstalled: 'PyTorch 未安装，.pt/.pth 文件预览不可用',
+    install7Zip: '安装7-Zip',
+    sevenZipNotInstalledPrompt: '7-Zip 未安装。需要打开官网下载吗？',
+    openWebsite: '打开官网',
+    useWinget: '使用 winget 安装',
+    installCompletePrompt: '安装完成后请点击"重新检测"',
+    sevenZipNotInstalledLinux: '7-Zip 未安装。需要安装吗？',
+    usePackageManager: '使用包管理器安装',
+    noWorkspaceFolder: '无法创建虚拟环境：未找到工作区目录'
+};

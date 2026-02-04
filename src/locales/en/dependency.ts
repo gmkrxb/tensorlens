@@ -1,0 +1,35 @@
+/**
+ * English - Dependency management
+ */
+export default {
+    checkingTitle: 'Check Dependency Status',
+    pythonNotFound: 'Python environment not detected. TensorLens requires Python 3.7+ to preview tensor files.',
+    installPython: 'Install Python',
+    configurePythonPath: 'Configure Python Path',
+    systemPythonDetected: 'System Python {0} detected. It is recommended to create a dedicated virtual environment for TensorLens to avoid dependency conflicts.',
+    createVirtualEnv: 'Create Virtual Environment',
+    useSystemPython: 'Use System Python',
+    venvCreatedSuccess: 'Virtual environment created successfully!',
+    venvCreatedFail: 'Failed to create virtual environment, please check terminal output',
+    creatingVenv: 'Creating Python virtual environment, please click "Complete" when finished',
+    missingDependencies: 'Missing required dependencies: {0}. Tensor preview functionality will be unavailable.',
+    installDependencies: 'Install Dependencies',
+    installing: 'Installing {0}, please click "Recheck" after installation completes',
+    checkComplete: 'Dependency check complete: Python {0}{1}, NumPy {2}, {3}',
+    checkCompleteWithSevenZip: 'Dependency check complete: Python {0}{1}, NumPy {2}, {3}.\n{4}',
+    torchInstalled: 'PyTorch {0}',
+    torchNotInstalled: 'PyTorch not installed (.pt/.pth files unavailable)',
+    sevenZipInstalled: '7-Zip installed',
+    sevenZipNotInstalled: '7-Zip not installed (RAR/7Z extraction unavailable)',
+    virtualEnv: '(virtual env)',
+    warningMissingDeps: 'TensorLens: Missing dependencies {0}, some features unavailable',
+    pytorchNotInstalled: 'PyTorch not installed, .pt/.pth file preview unavailable',
+    install7Zip: 'Install 7-Zip',
+    sevenZipNotInstalledPrompt: '7-Zip not installed. Open official website to download?',
+    openWebsite: 'Open Website',
+    useWinget: 'Install with winget',
+    installCompletePrompt: 'Please click "Recheck" after installation completes',
+    sevenZipNotInstalledLinux: '7-Zip not installed. Would you like to install it?',
+    usePackageManager: 'Install with Package Manager',
+    noWorkspaceFolder: 'Cannot create virtual environment: workspace folder not found'
+};
