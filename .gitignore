@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.vsix
+.vscode-test/
+
+# 个人推送脚本
+scripts/github_push.py
+
+# 生成测试脚本
+scripts\generate_test_data.py
+
+# Python虚拟环境
+.tensorlens-venv/
+
+

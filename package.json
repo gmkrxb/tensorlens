@@ -1,0 +1,223 @@
+{
+  "name": "tensorlens",
+  "displayName": "TensorLens",
+  "description": "Preview and analyze tensor files (.npz, .pt, .npy) and archives (.zip, .rar, .7z) with visualization",
+  "version": "0.1.0",
+  "publisher": "iomi-team",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gumingke/tensorlens.git"
+  },
+  "homepage": "https://iomi.team",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Data Science",
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "tensor",
+    "numpy",
+    "pytorch",
+    "npz",
+    "npy",
+    "pt",
+    "preview",
+    "visualization",
+    "archive",
+    "zip"
+  ],
+  "activationEvents": [
+    "onLanguage:python",
+    "workspaceContains:**/*.npz",
+    "workspaceContains:**/*.npy",
+    "workspaceContains:**/*.pt",
+    "workspaceContains:**/*.pth"
+  ],
+  "extensionDependencies": [
+    "ms-python.python"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "tensorlens-explorer",
+          "title": "TensorLens",
+          "icon": "media/sidebar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "tensorlens-explorer": [
+        {
+          "id": "tensorlens-sidebar",
+          "name": "TensorLens",
+          "type": "webview",
+          "icon": "media/sidebar-icon.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "tensorLens.openFile",
+        "title": "打开张量文件预览",
+        "category": "TensorLens"
+      },
+      {
+        "command": "tensorLens.extractArchive",
+        "title": "解压压缩文件",
+        "category": "TensorLens"
+      },
+      {
+        "command": "tensorLens.previewArchive",
+        "title": "预览压缩文件内容",
+        "category": "TensorLens"
+      },
+      {
+        "command": "tensorLens.checkDependencies",
+        "title": "检查依赖状态",
+        "category": "TensorLens"
+      },
+      {
+        "command": "tensorLens.installDependency",
+        "title": "安装Python依赖",
+        "category": "TensorLens"
+      },
+      {
+        "command": "tensorLens.createVirtualEnvironment",
+        "title": "创建Python虚拟环境",
+        "category": "TensorLens"
+      },
+      {
+        "command": "tensorLens.switchLanguage",
+        "title": "切换语言 / Switch Language",
+        "category": "TensorLens"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "tensorLens.tensorEditor",
+        "displayName": "Tensor Viewer",
+        "selector": [
+          {
+            "filenamePattern": "*.npz"
+          },
+          {
+            "filenamePattern": "*.npy"
+          },
+          {
+            "filenamePattern": "*.pt"
+          },
+          {
+            "filenamePattern": "*.pth"
+          }
+        ],
+        "priority": "default"
+      },
+      {
+        "viewType": "tensorLens.archiveEditor",
+        "displayName": "Archive Viewer",
+        "selector": [
+          {
+            "filenamePattern": "*.zip"
+          },
+          {
+            "filenamePattern": "*.rar"
+          },
+          {
+            "filenamePattern": "*.7z"
+          },
+          {
+            "filenamePattern": "*.tar"
+          },
+          {
+            "filenamePattern": "*.gz"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "tensorLens.openFile",
+          "when": "resourceExtname == .npz || resourceExtname == .npy || resourceExtname == .pt || resourceExtname == .pth",
+          "group": "navigation"
+        },
+        {
+          "command": "tensorLens.extractArchive",
+          "when": "resourceExtname == .zip || resourceExtname == .rar || resourceExtname == .7z || resourceExtname == .tar || resourceExtname == .gz",
+          "group": "navigation"
+        },
+        {
+          "command": "tensorLens.previewArchive",
+          "when": "resourceExtname == .zip || resourceExtname == .rar || resourceExtname == .7z || resourceExtname == .tar || resourceExtname == .gz",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "TensorLens",
+      "properties": {
+        "tensorLens.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python interpreter path"
+        },
+        "tensorLens.maxPreviewSize": {
+          "type": "number",
+          "default": 10000,
+          "description": "Maximum number of preview elements"
+        },
+        "tensorLens.defaultChartType": {
+          "type": "string",
+          "enum": [
+            "line",
+            "bar",
+            "scatter",
+            "heatmap",
+            "histogram"
+          ],
+          "default": "line",
+          "description": "Default chart type"
+        },
+        "tensorLens.language": {
+          "type": "string",
+          "enum": [
+            "zh-cn",
+            "en"
+          ],
+          "default": "zh-cn",
+          "description": "Interface language / 界面语言"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "npx vsce package",
+    "install-extension": "node scripts/install-extension.js"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.10",
+    "node-7z": "^3.0.0"
+  }
+}
